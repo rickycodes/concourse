@@ -17,8 +17,10 @@ type VolumeRepository interface {
 	CreateContainerVolume(teamID int, workerName string, container CreatingContainer, mountPath string) (CreatingVolume, error)
 	FindContainerVolume(teamID int, workerName string, container CreatingContainer, mountPath string) (CreatingVolume, CreatedVolume, error)
 
-	FindBaseResourceTypeVolume(usedWorkerBaseResourceType *UsedWorkerBaseResourceType) (CreatingVolume, CreatedVolume, error)
-	CreateBaseResourceTypeVolume(usedWorkerBaseResourceType *UsedWorkerBaseResourceType) (CreatingVolume, error)
+	CreateVolume(int, string, VolumeType) (CreatingVolume, error)
+
+	FindBaseResourceTypeVolume(*UsedWorkerBaseResourceType) (CreatingVolume, CreatedVolume, error)
+	CreateBaseResourceTypeVolume(*UsedWorkerBaseResourceType) (CreatingVolume, error)
 
 	FindResourceCacheVolume(workerName string, resourceCache UsedResourceCache) (CreatedVolume, bool, error)
 
@@ -251,6 +253,20 @@ func (repository *volumeRepository) CreateBaseResourceTypeVolume(uwbrt *UsedWork
 	}
 
 	volume.workerBaseResourceTypeID = uwbrt.ID
+	return volume, nil
+}
+
+func (repository *volumeRepository) CreateVolume(teamID int, workerName string, volumeType VolumeType) (CreatingVolume, error) {
+	volume, err := repository.createVolume(
+		0,
+		workerName,
+		map[string]interface{}{},
+		volumeType,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return volume, nil
 }
 

@@ -7,10 +7,9 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/concourse/concourse/atc"
 	"github.com/lib/pq"
 	uuid "github.com/nu7hatch/gouuid"
-
-	"github.com/concourse/concourse/atc"
 )
 
 var (
@@ -53,6 +52,7 @@ const (
 	VolumeTypeResourceType  VolumeType = "resource-type"
 	VolumeTypeResourceCerts VolumeType = "resource-certs"
 	VolumeTypeTaskCache     VolumeType = "task-cache"
+	VolumeTypeArtifact      VolumeType = "artifact"
 	VolumeTypeUknown        VolumeType = "unknown" // for migration to life
 )
 
@@ -149,6 +149,7 @@ type CreatedVolume interface {
 	Destroying() (DestroyingVolume, error)
 	WorkerName() string
 	InitializeResourceCache(UsedResourceCache) error
+	InitializeArtifact(string, string) (WorkerArtifact, error)
 	InitializeTaskCache(int, string, string) error
 	ContainerHandle() string
 	ParentHandle() string
@@ -383,6 +384,33 @@ func (volume *createdVolume) InitializeResourceCache(resourceCache UsedResourceC
 	volume.typ = VolumeTypeResource
 
 	return nil
+}
+
+func (volume *createdVolume) InitializeArtifact(path string, checksum string) (WorkerArtifact, error) {
+
+	tx, err := volume.conn.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	defer Rollback(tx)
+	// initialize worker artifact
+	atcWorkerArtifact := atc.WorkerArtifact{
+		Checksum: checksum,
+		Path:     path,
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = saveWorkerArtifact(tx, atcWorkerArtifact, volume.conn)
+	if err != nil {
+		return nil, err
+	}
+
+	// associate worker artifact with the volume
+
+	return nil, nil
 }
 
 func (volume *createdVolume) InitializeTaskCache(jobID int, stepName string, path string) error {

@@ -54,6 +54,10 @@ type Team interface {
 	Containers(lager.Logger) ([]Container, error)
 	IsCheckContainer(string) (bool, error)
 	IsContainerWithinTeam(string, bool) (bool, error)
+
+	SaveWorkerArtifact(atcArtifact atc.WorkerArtifact) (WorkerArtifact, error)
+	WorkerArtifact(id int) (WorkerArtifact, bool, error)
+
 	FindContainerByHandle(string) (Container, bool, error)
 	FindCheckContainers(lager.Logger, string, string, creds.VariablesFactory) ([]Container, map[int]time.Time, error)
 	FindContainersByMetadata(ContainerMetadata) ([]Container, error)
@@ -645,6 +649,38 @@ func (t *team) BuildsWithTime(page Page) ([]Build, Pagination, error) {
 
 func (t *team) Builds(page Page) ([]Build, Pagination, error) {
 	return getBuildsWithPagination(buildsQuery.Where(sq.Eq{"t.id": t.id}), minMaxIdQuery, page, t.conn, t.lockFactory)
+}
+
+func (t *team) SaveWorkerArtifact(atcArtifact atc.WorkerArtifact) (WorkerArtifact, error) {
+	tx, err := t.conn.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	defer Rollback(tx)
+
+	artifact, err := saveWorkerArtifact(tx, atcArtifact, t.conn)
+	if err != nil {
+		return nil, err
+	}
+
+	return artifact, tx.Commit()
+}
+
+func (t *team) WorkerArtifact(id int) (WorkerArtifact, bool, error) {
+	tx, err := t.conn.Begin()
+	if err != nil {
+		return nil, false, err
+	}
+
+	defer Rollback(tx)
+
+	artifact, found, err := getWorkerArtifact(tx, id, t.conn)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return artifact, found, tx.Commit()
 }
 
 func (t *team) SaveWorker(atcWorker atc.Worker, ttl time.Duration) (Worker, error) {

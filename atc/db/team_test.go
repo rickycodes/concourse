@@ -11,7 +11,6 @@ import (
 	"github.com/concourse/concourse/atc/creds"
 	"github.com/concourse/concourse/atc/creds/credsfakes"
 	"github.com/concourse/concourse/atc/db"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -2347,6 +2346,73 @@ var _ = Describe("Team", func() {
 					Expect(ok).To(BeFalse())
 				})
 			})
+		})
+	})
+
+	FDescribe("WorkerArtifacts", func() {
+		var err error
+		var artifact db.WorkerArtifact
+
+		Context("When there is an artifact for the team", func() {
+			BeforeEach(func() {
+				atcArtifact := atc.WorkerArtifact{
+					Path:     "some-path",
+					Checksum: "some-checksum",
+				}
+
+				artifact, err = team.SaveWorkerArtifact(atcArtifact)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(artifact).ToNot(BeNil())
+			})
+
+			It("finds the artifact without error", func() {
+				artifact, found, err := team.WorkerArtifact(artifact.ID())
+				Expect(err).ToNot(HaveOccurred())
+				Expect(found).To(BeTrue())
+				Expect(artifact.ID()).To(BeNumerically(">", 0))
+				Expect(artifact.Checksum()).To(Equal("some-checksum"))
+				Expect(artifact.Path()).To(Equal("some-path"))
+			})
+		})
+
+		Context("When there is an artifact for another team", func() {
+			BeforeEach(func() {
+				atcArtifact := atc.WorkerArtifact{
+					Path:     "some-path",
+					Checksum: "some-checksum",
+				}
+
+				artifact, err = otherTeam.SaveWorkerArtifact(atcArtifact)
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			It("does not find the artifact", func() {
+				_, found, err := team.WorkerArtifact(artifact.ID())
+				Expect(err).ToNot(HaveOccurred())
+				Expect(found).To(BeFalse())
+			})
+		})
+
+		Context("When there is no artifact for the team", func() {
+			It("returns error", func() {
+				_, found, err := team.WorkerArtifact(1000)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(found).To(BeFalse())
+			})
+		})
+	})
+
+	Describe("Save Worker Artifact", func() {
+		It("saves the artifact", func() {
+			atcArtifact := atc.WorkerArtifact{
+				Checksum: "some-checksum",
+				Path:     "some-path",
+			}
+			savedArtifact, err := team.SaveWorkerArtifact(atcArtifact)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(savedArtifact.ID()).To(BeNumerically(">", 0))
+			Expect(savedArtifact.Checksum()).To(Equal("some-checksum"))
+			Expect(savedArtifact.Path()).To(Equal("some-path"))
 		})
 	})
 })
