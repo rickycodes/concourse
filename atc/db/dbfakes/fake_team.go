@@ -328,19 +328,6 @@ type FakeTeam struct {
 		result1 db.Worker
 		result2 error
 	}
-	SaveWorkerArtifactStub        func(atc.WorkerArtifact) (db.WorkerArtifact, error)
-	saveWorkerArtifactMutex       sync.RWMutex
-	saveWorkerArtifactArgsForCall []struct {
-		arg1 atc.WorkerArtifact
-	}
-	saveWorkerArtifactReturns struct {
-		result1 db.WorkerArtifact
-		result2 error
-	}
-	saveWorkerArtifactReturnsOnCall map[int]struct {
-		result1 db.WorkerArtifact
-		result2 error
-	}
 	UpdateProviderAuthStub        func(atc.TeamAuth) error
 	updateProviderAuthMutex       sync.RWMutex
 	updateProviderAuthArgsForCall []struct {
@@ -363,21 +350,6 @@ type FakeTeam struct {
 	visiblePipelinesReturnsOnCall map[int]struct {
 		result1 []db.Pipeline
 		result2 error
-	}
-	WorkerArtifactStub        func(int) (db.WorkerArtifact, bool, error)
-	workerArtifactMutex       sync.RWMutex
-	workerArtifactArgsForCall []struct {
-		arg1 int
-	}
-	workerArtifactReturns struct {
-		result1 db.WorkerArtifact
-		result2 bool
-		result3 error
-	}
-	workerArtifactReturnsOnCall map[int]struct {
-		result1 db.WorkerArtifact
-		result2 bool
-		result3 error
 	}
 	WorkersStub        func() ([]db.Worker, error)
 	workersMutex       sync.RWMutex
@@ -1862,69 +1834,6 @@ func (fake *FakeTeam) SaveWorkerReturnsOnCall(i int, result1 db.Worker, result2 
 	}{result1, result2}
 }
 
-func (fake *FakeTeam) SaveWorkerArtifact(arg1 atc.WorkerArtifact) (db.WorkerArtifact, error) {
-	fake.saveWorkerArtifactMutex.Lock()
-	ret, specificReturn := fake.saveWorkerArtifactReturnsOnCall[len(fake.saveWorkerArtifactArgsForCall)]
-	fake.saveWorkerArtifactArgsForCall = append(fake.saveWorkerArtifactArgsForCall, struct {
-		arg1 atc.WorkerArtifact
-	}{arg1})
-	fake.recordInvocation("SaveWorkerArtifact", []interface{}{arg1})
-	fake.saveWorkerArtifactMutex.Unlock()
-	if fake.SaveWorkerArtifactStub != nil {
-		return fake.SaveWorkerArtifactStub(arg1)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	fakeReturns := fake.saveWorkerArtifactReturns
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeTeam) SaveWorkerArtifactCallCount() int {
-	fake.saveWorkerArtifactMutex.RLock()
-	defer fake.saveWorkerArtifactMutex.RUnlock()
-	return len(fake.saveWorkerArtifactArgsForCall)
-}
-
-func (fake *FakeTeam) SaveWorkerArtifactCalls(stub func(atc.WorkerArtifact) (db.WorkerArtifact, error)) {
-	fake.saveWorkerArtifactMutex.Lock()
-	defer fake.saveWorkerArtifactMutex.Unlock()
-	fake.SaveWorkerArtifactStub = stub
-}
-
-func (fake *FakeTeam) SaveWorkerArtifactArgsForCall(i int) atc.WorkerArtifact {
-	fake.saveWorkerArtifactMutex.RLock()
-	defer fake.saveWorkerArtifactMutex.RUnlock()
-	argsForCall := fake.saveWorkerArtifactArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeTeam) SaveWorkerArtifactReturns(result1 db.WorkerArtifact, result2 error) {
-	fake.saveWorkerArtifactMutex.Lock()
-	defer fake.saveWorkerArtifactMutex.Unlock()
-	fake.SaveWorkerArtifactStub = nil
-	fake.saveWorkerArtifactReturns = struct {
-		result1 db.WorkerArtifact
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeTeam) SaveWorkerArtifactReturnsOnCall(i int, result1 db.WorkerArtifact, result2 error) {
-	fake.saveWorkerArtifactMutex.Lock()
-	defer fake.saveWorkerArtifactMutex.Unlock()
-	fake.SaveWorkerArtifactStub = nil
-	if fake.saveWorkerArtifactReturnsOnCall == nil {
-		fake.saveWorkerArtifactReturnsOnCall = make(map[int]struct {
-			result1 db.WorkerArtifact
-			result2 error
-		})
-	}
-	fake.saveWorkerArtifactReturnsOnCall[i] = struct {
-		result1 db.WorkerArtifact
-		result2 error
-	}{result1, result2}
-}
-
 func (fake *FakeTeam) UpdateProviderAuth(arg1 atc.TeamAuth) error {
 	fake.updateProviderAuthMutex.Lock()
 	ret, specificReturn := fake.updateProviderAuthReturnsOnCall[len(fake.updateProviderAuthArgsForCall)]
@@ -2040,72 +1949,6 @@ func (fake *FakeTeam) VisiblePipelinesReturnsOnCall(i int, result1 []db.Pipeline
 	}{result1, result2}
 }
 
-func (fake *FakeTeam) WorkerArtifact(arg1 int) (db.WorkerArtifact, bool, error) {
-	fake.workerArtifactMutex.Lock()
-	ret, specificReturn := fake.workerArtifactReturnsOnCall[len(fake.workerArtifactArgsForCall)]
-	fake.workerArtifactArgsForCall = append(fake.workerArtifactArgsForCall, struct {
-		arg1 int
-	}{arg1})
-	fake.recordInvocation("WorkerArtifact", []interface{}{arg1})
-	fake.workerArtifactMutex.Unlock()
-	if fake.WorkerArtifactStub != nil {
-		return fake.WorkerArtifactStub(arg1)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2, ret.result3
-	}
-	fakeReturns := fake.workerArtifactReturns
-	return fakeReturns.result1, fakeReturns.result2, fakeReturns.result3
-}
-
-func (fake *FakeTeam) WorkerArtifactCallCount() int {
-	fake.workerArtifactMutex.RLock()
-	defer fake.workerArtifactMutex.RUnlock()
-	return len(fake.workerArtifactArgsForCall)
-}
-
-func (fake *FakeTeam) WorkerArtifactCalls(stub func(int) (db.WorkerArtifact, bool, error)) {
-	fake.workerArtifactMutex.Lock()
-	defer fake.workerArtifactMutex.Unlock()
-	fake.WorkerArtifactStub = stub
-}
-
-func (fake *FakeTeam) WorkerArtifactArgsForCall(i int) int {
-	fake.workerArtifactMutex.RLock()
-	defer fake.workerArtifactMutex.RUnlock()
-	argsForCall := fake.workerArtifactArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeTeam) WorkerArtifactReturns(result1 db.WorkerArtifact, result2 bool, result3 error) {
-	fake.workerArtifactMutex.Lock()
-	defer fake.workerArtifactMutex.Unlock()
-	fake.WorkerArtifactStub = nil
-	fake.workerArtifactReturns = struct {
-		result1 db.WorkerArtifact
-		result2 bool
-		result3 error
-	}{result1, result2, result3}
-}
-
-func (fake *FakeTeam) WorkerArtifactReturnsOnCall(i int, result1 db.WorkerArtifact, result2 bool, result3 error) {
-	fake.workerArtifactMutex.Lock()
-	defer fake.workerArtifactMutex.Unlock()
-	fake.WorkerArtifactStub = nil
-	if fake.workerArtifactReturnsOnCall == nil {
-		fake.workerArtifactReturnsOnCall = make(map[int]struct {
-			result1 db.WorkerArtifact
-			result2 bool
-			result3 error
-		})
-	}
-	fake.workerArtifactReturnsOnCall[i] = struct {
-		result1 db.WorkerArtifact
-		result2 bool
-		result3 error
-	}{result1, result2, result3}
-}
-
 func (fake *FakeTeam) Workers() ([]db.Worker, error) {
 	fake.workersMutex.Lock()
 	ret, specificReturn := fake.workersReturnsOnCall[len(fake.workersArgsForCall)]
@@ -2212,14 +2055,10 @@ func (fake *FakeTeam) Invocations() map[string][][]interface{} {
 	defer fake.savePipelineMutex.RUnlock()
 	fake.saveWorkerMutex.RLock()
 	defer fake.saveWorkerMutex.RUnlock()
-	fake.saveWorkerArtifactMutex.RLock()
-	defer fake.saveWorkerArtifactMutex.RUnlock()
 	fake.updateProviderAuthMutex.RLock()
 	defer fake.updateProviderAuthMutex.RUnlock()
 	fake.visiblePipelinesMutex.RLock()
 	defer fake.visiblePipelinesMutex.RUnlock()
-	fake.workerArtifactMutex.RLock()
-	defer fake.workerArtifactMutex.RUnlock()
 	fake.workersMutex.RLock()
 	defer fake.workersMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

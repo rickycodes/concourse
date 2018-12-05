@@ -8,13 +8,10 @@ import (
 func Artifact(artifact db.WorkerArtifact) atc.WorkerArtifact {
 
 	atcWorkerArtifact := atc.WorkerArtifact{
-		ID:       artifact.ID(),
-		Path:     artifact.Path(),
-		Checksum: artifact.Checksum(),
-	}
-
-	if !artifact.CreatedAt().IsZero() {
-		atcWorkerArtifact = artifact.CreatedAt().Unix()
+		ID:        artifact.ID(),
+		Path:      artifact.Path(),
+		Checksum:  artifact.Checksum(),
+		CreatedAt: artifact.CreatedAt().Unix(),
 	}
 
 	return atcWorkerArtifact

@@ -164,7 +164,7 @@ func (c *volumeClient) FindOrCreateVolume(
 		logger.Session("find-or-create-volume-for-artifact"),
 		volumeSpec,
 		func() (db.CreatingVolume, db.CreatedVolume, error) {
-			return nil, nil, errors.New("Not implemented")
+			return nil, nil, nil
 		},
 		func() (db.CreatingVolume, error) {
 			return c.dbVolumeRepository.CreateVolume(teamID, workerName, volumeType)

@@ -172,6 +172,16 @@ type FakeCreatedVolume struct {
 	typeReturnsOnCall map[int]struct {
 		result1 db.VolumeType
 	}
+	WorkerArtifactIDStub        func() int
+	workerArtifactIDMutex       sync.RWMutex
+	workerArtifactIDArgsForCall []struct {
+	}
+	workerArtifactIDReturns struct {
+		result1 int
+	}
+	workerArtifactIDReturnsOnCall map[int]struct {
+		result1 int
+	}
 	WorkerNameStub        func() string
 	workerNameMutex       sync.RWMutex
 	workerNameArgsForCall []struct {
@@ -974,6 +984,58 @@ func (fake *FakeCreatedVolume) TypeReturnsOnCall(i int, result1 db.VolumeType) {
 	}{result1}
 }
 
+func (fake *FakeCreatedVolume) WorkerArtifactID() int {
+	fake.workerArtifactIDMutex.Lock()
+	ret, specificReturn := fake.workerArtifactIDReturnsOnCall[len(fake.workerArtifactIDArgsForCall)]
+	fake.workerArtifactIDArgsForCall = append(fake.workerArtifactIDArgsForCall, struct {
+	}{})
+	fake.recordInvocation("WorkerArtifactID", []interface{}{})
+	fake.workerArtifactIDMutex.Unlock()
+	if fake.WorkerArtifactIDStub != nil {
+		return fake.WorkerArtifactIDStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.workerArtifactIDReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeCreatedVolume) WorkerArtifactIDCallCount() int {
+	fake.workerArtifactIDMutex.RLock()
+	defer fake.workerArtifactIDMutex.RUnlock()
+	return len(fake.workerArtifactIDArgsForCall)
+}
+
+func (fake *FakeCreatedVolume) WorkerArtifactIDCalls(stub func() int) {
+	fake.workerArtifactIDMutex.Lock()
+	defer fake.workerArtifactIDMutex.Unlock()
+	fake.WorkerArtifactIDStub = stub
+}
+
+func (fake *FakeCreatedVolume) WorkerArtifactIDReturns(result1 int) {
+	fake.workerArtifactIDMutex.Lock()
+	defer fake.workerArtifactIDMutex.Unlock()
+	fake.WorkerArtifactIDStub = nil
+	fake.workerArtifactIDReturns = struct {
+		result1 int
+	}{result1}
+}
+
+func (fake *FakeCreatedVolume) WorkerArtifactIDReturnsOnCall(i int, result1 int) {
+	fake.workerArtifactIDMutex.Lock()
+	defer fake.workerArtifactIDMutex.Unlock()
+	fake.WorkerArtifactIDStub = nil
+	if fake.workerArtifactIDReturnsOnCall == nil {
+		fake.workerArtifactIDReturnsOnCall = make(map[int]struct {
+			result1 int
+		})
+	}
+	fake.workerArtifactIDReturnsOnCall[i] = struct {
+		result1 int
+	}{result1}
+}
+
 func (fake *FakeCreatedVolume) WorkerName() string {
 	fake.workerNameMutex.Lock()
 	ret, specificReturn := fake.workerNameReturnsOnCall[len(fake.workerNameArgsForCall)]
@@ -1057,6 +1119,8 @@ func (fake *FakeCreatedVolume) Invocations() map[string][][]interface{} {
 	defer fake.teamIDMutex.RUnlock()
 	fake.typeMutex.RLock()
 	defer fake.typeMutex.RUnlock()
+	fake.workerArtifactIDMutex.RLock()
+	defer fake.workerArtifactIDMutex.RUnlock()
 	fake.workerNameMutex.RLock()
 	defer fake.workerNameMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

@@ -78,6 +78,7 @@ type creatingVolume struct {
 	workerBaseResourceTypeID int
 	workerTaskCacheID        int
 	workerResourceCertsID    int
+	workerArtifactID         int
 	conn                     Conn
 }
 
@@ -145,6 +146,7 @@ type CreatedVolume interface {
 	Path() string
 	Type() VolumeType
 	TeamID() int
+	WorkerArtifactID() int
 	CreateChildForContainer(CreatingContainer, string) (CreatingVolume, error)
 	Destroying() (DestroyingVolume, error)
 	WorkerName() string
@@ -171,6 +173,7 @@ type createdVolume struct {
 	workerBaseResourceTypeID int
 	workerTaskCacheID        int
 	workerResourceCertsID    int
+	workerArtifactID         int
 	conn                     Conn
 }
 
@@ -187,6 +190,7 @@ func (volume *createdVolume) Type() VolumeType        { return volume.typ }
 func (volume *createdVolume) TeamID() int             { return volume.teamID }
 func (volume *createdVolume) ContainerHandle() string { return volume.containerHandle }
 func (volume *createdVolume) ParentHandle() string    { return volume.parentHandle }
+func (volume *createdVolume) WorkerArtifactID() int   { return volume.workerArtifactID }
 
 func (volume *createdVolume) ResourceType() (*VolumeResourceType, error) {
 	if volume.resourceCacheID == 0 {
@@ -394,23 +398,41 @@ func (volume *createdVolume) InitializeArtifact(path string, checksum string) (W
 	}
 
 	defer Rollback(tx)
-	// initialize worker artifact
+
 	atcWorkerArtifact := atc.WorkerArtifact{
 		Checksum: checksum,
 		Path:     path,
 	}
+
+	workerArtifact, err := saveWorkerArtifact(tx, atcWorkerArtifact, volume.conn)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = saveWorkerArtifact(tx, atcWorkerArtifact, volume.conn)
+	rows, err := psql.Update("volumes").
+		Set("worker_artifact_id", workerArtifact.ID()).
+		Where(sq.Eq{"id": volume.id}).
+		RunWith(tx).
+		Exec()
 	if err != nil {
 		return nil, err
 	}
 
-	// associate worker artifact with the volume
+	affected, err := rows.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	if affected == 0 {
+		return nil, ErrVolumeMissing
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	return workerArtifact, nil
 }
 
 func (volume *createdVolume) InitializeTaskCache(jobID int, stepName string, path string) error {

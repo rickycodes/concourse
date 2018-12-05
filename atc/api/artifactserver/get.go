@@ -10,6 +10,7 @@ import (
 	"github.com/concourse/concourse/atc/db"
 )
 
+// XXX: stream the content
 func (s *Server) GetArtifact(team db.Team) http.Handler {
 	logger := s.logger.Session("get-artifact")
 
@@ -24,7 +25,7 @@ func (s *Server) GetArtifact(team db.Team) http.Handler {
 			return
 		}
 
-		artifact, found, err := team.WorkerArtifact(artifactID)
+		artifact, found, err := team.WorkerArtifactVolume(artifactID)
 		if err != nil {
 			logger.Error("failed-to-get-artifact", err)
 			w.WriteHeader(http.StatusInternalServerError)

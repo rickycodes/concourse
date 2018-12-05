@@ -439,6 +439,7 @@ func (repository *volumeRepository) GetOrphanedVolumes() ([]CreatedVolume, error
 				"v.container_id":                 nil,
 				"v.worker_task_cache_id":         nil,
 				"v.worker_resource_certs_id":     nil,
+				"v.worker_artifact_id":           nil,
 			},
 		).
 		Where(sq.Eq{"v.state": string(VolumeStateCreated)}).
@@ -615,12 +616,14 @@ var volumeColumns = []string{
 	"v.worker_base_resource_type_id",
 	"v.worker_task_cache_id",
 	"v.worker_resource_certs_id",
+	"v.worker_artifact_id",
 	`case
 	when v.worker_base_resource_type_id is not NULL then 'resource-type'
 	when v.worker_resource_cache_id is not NULL then 'resource'
 	when v.container_id is not NULL then 'container'
 	when v.worker_task_cache_id is not NULL then 'task-cache'
 	when v.worker_resource_certs_id is not NULL then 'resource-certs'
+	when v.worker_artifact_id is not NULL then 'artifact'
 	else 'unknown'
 end`,
 }
@@ -638,6 +641,7 @@ func scanVolume(row sq.RowScanner, conn Conn) (CreatingVolume, CreatedVolume, De
 	var sqWorkerBaseResourceTypeID sql.NullInt64
 	var sqWorkerTaskCacheID sql.NullInt64
 	var sqWorkerResourceCertsID sql.NullInt64
+	var sqWorkerArtifactID sql.NullInt64
 	var volumeType VolumeType
 
 	err := row.Scan(
@@ -653,6 +657,7 @@ func scanVolume(row sq.RowScanner, conn Conn) (CreatingVolume, CreatedVolume, De
 		&sqWorkerBaseResourceTypeID,
 		&sqWorkerTaskCacheID,
 		&sqWorkerResourceCertsID,
+		&sqWorkerArtifactID,
 		&volumeType,
 	)
 	if err != nil {
@@ -699,6 +704,11 @@ func scanVolume(row sq.RowScanner, conn Conn) (CreatingVolume, CreatedVolume, De
 		workerResourceCertsID = int(sqWorkerResourceCertsID.Int64)
 	}
 
+	var workerArtifactID int
+	if sqWorkerArtifactID.Valid {
+		workerArtifactID = int(sqWorkerArtifactID.Int64)
+	}
+
 	switch VolumeState(state) {
 	case VolumeStateCreated:
 		return nil, &createdVolume{
@@ -714,6 +724,7 @@ func scanVolume(row sq.RowScanner, conn Conn) (CreatingVolume, CreatedVolume, De
 			workerBaseResourceTypeID: workerBaseResourceTypeID,
 			workerTaskCacheID:        workerTaskCacheID,
 			workerResourceCertsID:    workerResourceCertsID,
+			workerArtifactID:         workerArtifactID,
 			conn:                     conn,
 		}, nil, nil, nil
 	case VolumeStateCreating:
@@ -730,6 +741,7 @@ func scanVolume(row sq.RowScanner, conn Conn) (CreatingVolume, CreatedVolume, De
 			workerBaseResourceTypeID: workerBaseResourceTypeID,
 			workerTaskCacheID:        workerTaskCacheID,
 			workerResourceCertsID:    workerResourceCertsID,
+			workerArtifactID:         workerArtifactID,
 			conn:                     conn,
 		}, nil, nil, nil, nil
 	case VolumeStateDestroying:

@@ -50,7 +50,7 @@ func (s *Server) CreateArtifact(team db.Team) http.Handler {
 			ID:        artifact.ID(),
 			Checksum:  "",
 			Path:      "/",
-			CreatedAt: artifact.CreatedAt(),
+			CreatedAt: artifact.CreatedAt().Unix(),
 		})
 	})
 }

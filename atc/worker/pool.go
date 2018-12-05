@@ -187,8 +187,13 @@ func (*pool) FindResourceTypeByPath(string) (atc.WorkerResourceType, bool) {
 	return atc.WorkerResourceType{}, false
 }
 
-func (*pool) CreateVolume(logger lager.Logger, spec VolumeSpec, teamID int, volumeType db.VolumeType) (Volume, error) {
-	return nil, errors.New("CreateVolume not implemented for pool")
+func (pool *pool) CreateVolume(logger lager.Logger, spec VolumeSpec, teamID int, volumeType db.VolumeType) (Volume, error) {
+	worker, err := pool.Satisfying(logger, WorkerSpec{TeamID: teamID}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return worker.CreateVolume(logger, spec, teamID, volumeType)
 }
 
 func (*pool) LookupVolume(lager.Logger, string) (Volume, bool, error) {

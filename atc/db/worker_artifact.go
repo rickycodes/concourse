@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -16,6 +17,7 @@ type WorkerArtifact interface {
 	Path() string
 	Checksum() string
 	CreatedAt() time.Time
+	Volume(int) (CreatedVolume, bool, error)
 }
 
 type artifact struct {
@@ -50,20 +52,20 @@ func saveWorkerArtifact(tx Tx, atcArtifact atc.WorkerArtifact, conn Conn) (Worke
 		return nil, err
 	}
 
-	artifact, found, err := getWorkerArtifact(tx, artifactID, conn)
+	artifact, found, err := getWorkerArtifact(tx, conn, artifactID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if !found {
-		return nil, nil
+		return nil, errors.New("Not found")
 	}
 
 	return artifact, nil
 }
 
-func getWorkerArtifact(tx Tx, id int, conn Conn) (WorkerArtifact, bool, error) {
+func getWorkerArtifact(tx Tx, conn Conn, id int) (WorkerArtifact, bool, error) {
 	var createdAtTime pq.NullTime
 
 	artifact := &artifact{conn: conn}
@@ -86,4 +88,8 @@ func getWorkerArtifact(tx Tx, id int, conn Conn) (WorkerArtifact, bool, error) {
 
 	artifact.createdAt = createdAtTime.Time
 	return artifact, true, nil
+}
+
+func (a *artifact) Volume(teamID int) (CreatedVolume, bool, error) {
+	return nil, false, nil
 }
